@@ -1,7 +1,7 @@
 # coding=utf8
 # TARGET_DIR= gimp -idf --batch-interpreter python-fu-eval -b "execfile('convert.py')"
 
-from os import environ, walk
+from os import environ, listdir
 
 from gimpfu import pdb
 
@@ -9,7 +9,7 @@ def get_images(target_dir):
 	'''
 	Возвращает список картинок для обработки.
 	'''
-	all_files = walk(target_dir).next()[2]
+	all_files = listdir(target_dir)
 	images = filter(lambda filename: filename.lower().endswith('jpg'), all_files)
 	images.sort()
 	return images
