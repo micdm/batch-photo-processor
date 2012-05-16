@@ -3,7 +3,7 @@
 # TARGET_DIR= gimp -idf --batch-interpreter python-fu-eval -b "execfile('convert.py')"
 # Подставьте в TARGET_DIR адрес директории с картинками. Внутри должна быть создана поддиректория converted.
 
-from os import environ, walk
+from os import environ, listdir
 import os.path
 
 from gimpfu import pdb
@@ -15,8 +15,7 @@ def get_images(target_dir):
     @param target_dir: string
     @return: list
     '''
-    all_files = walk(target_dir).next()[2]
-    images = [filename.lower().endswith('jpg') for filename in all_files]
+    images = [filename.lower().endswith('jpg') for filename in listdir(target_dir)]
     images.sort()
     return images
 
