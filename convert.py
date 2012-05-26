@@ -15,7 +15,7 @@ def get_images(target_dir):
     @param target_dir: string
     @return: list
     '''
-    images = [filename.lower().endswith('jpg') for filename in listdir(target_dir)]
+    images = [filename for filename in listdir(target_dir) if filename.lower().endswith('jpg')]
     images.sort()
     return images
 
