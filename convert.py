@@ -9,6 +9,11 @@ import os.path
 from gimpfu import pdb
 
 
+# Максимальные ширина и высота пережатой фотографии:
+MAX_WIDTH = 1920
+MAX_HEIGHT = 1280
+
+
 def get_images(target_dir):
     '''
     Возвращает список картинок для обработки.
@@ -28,13 +33,11 @@ def get_image_new_dimensions(image):
     '''
     width = pdb.gimp_image_width(image)
     height = pdb.gimp_image_height(image)
+    if width <= MAX_WIDTH and height <= MAX_HEIGHT:
+        return width, height
     if width > height:
-        new_width = 1920
-        new_height = new_width * height / width
-    else:
-        new_height = 1280
-        new_width = new_height * width / height
-    return new_width, new_height
+        return MAX_WIDTH, int(MAX_WIDTH * height / width)
+    return int(MAX_HEIGHT * width / height), MAX_HEIGHT
 
 
 def convert_image(target_dir, output_dir, image_name):
@@ -44,7 +47,11 @@ def convert_image(target_dir, output_dir, image_name):
     @param output_dir: string
     @param image_name: string
     '''
-    image = pdb.file_jpeg_load('%s/%s'%(target_dir, image_name), image_name)
+    output_path = os.path.join(output_dir, image_name)
+    if os.path.exists(output_path):
+        print '%s already exists, skipping'%image_name
+        return
+    image = pdb.file_jpeg_load(os.path.join(target_dir, image_name), image_name)
     layer = image.layers[0]
     # Выравниваем уровни:
     # pdb.gimp_levels_stretch(layer)
@@ -57,7 +64,7 @@ def convert_image(target_dir, output_dir, image_name):
     pdb.plug_in_c_astretch(image, layer)
     # Повышаем резкость:
     pdb.plug_in_sharpen(image, layer, 50)
-    pdb.gimp_file_save(image, layer, '%s/%s'%(output_dir, image_name), image_name)
+    pdb.gimp_file_save(image, layer, output_path, image_name)
     pdb.gimp_image_delete(image)
 
 
@@ -98,7 +105,7 @@ def run():
     Запускает обработку.
     '''
     target_dir = environ.get('TARGET_DIR')
-    output_dir = '%s/converted/'%target_dir
+    output_dir = os.path.join(target_dir, 'converted')
     if check_dirs(target_dir, output_dir):
         print 'converting images from %s to %s'%(target_dir, output_dir)
         images = get_images(target_dir)
